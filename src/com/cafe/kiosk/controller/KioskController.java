@@ -1,5 +1,12 @@
 package com.cafe.kiosk.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.cafe.kiosk.domain.menu.MenuCategory;
+import com.cafe.kiosk.domain.menu.MenuItem;
+import com.cafe.kiosk.domain.menu.MenuOption;
+import com.cafe.kiosk.domain.order.Order;
 import com.cafe.kiosk.service.MenuService;
 import com.cafe.kiosk.service.OrderService;
 import com.cafe.kiosk.view.InputView;
@@ -13,7 +20,7 @@ public class KioskController {
 	private OrderService orderService;
 
 	public KioskController(OrderService orderService, MenuService menuService, OutputView outputView,
-			InputView inputView) { // 생성자
+			InputView inputView) {
 		this.orderService = orderService;
 		this.menuService = menuService;
 		this.outputView = outputView;
@@ -21,11 +28,20 @@ public class KioskController {
 	}
 
 	public void run() {
-		// 전체 로직 기능 구현
-		orderMain();// 장바구니 기능 추가
+		System.out.println("카페키오스크");
+		System.out.println("1.주문하기 2.장바구니");
+		int start = inputView.readNumber();
+		switch (start) {
+		case 1:
+			ItemAdd();
+		case 2:
+			orderMain();
+			break;
+		default:
+			System.out.println("잘못입력 종료.");
+		}
 	}
-
-	//-----------------장바구니----------------------
+	// ----------------- 장바구니 ----------------------
 	private void orderMain() {
 		while (true) {
 			ItemView();
@@ -33,26 +49,34 @@ public class KioskController {
 			int start = inputView.readNumber();
 			switch (start) {
 			case 1:
-				ItemSomePut(); // 상품 수량 변경
+				ItemAdd();
 				break;
 			case 2:
-				// 상품 옵션 변경
+				ItemSomePut();
 				break;
 			case 3:
-				ItemDelete(); // 상품 삭제
+				ItemDelete();
 				break;
 			case 4:
-				ItemDeleteAll(); // 상품 전체 삭제
+				ItemDeleteAll();
 				break;
 			case 5:
-				// 상품 추가하기 > 주문하기와 동일 >카테고리 화면 보여주기
+				payment();
 				break;
-			case 6:
-				payment();// 결제하기
-				break;
+			case 0:
+				System.out.println("종료합니다.");
+				System.exit(0);
 			default:
-				System.out.println("잘못입력함");
+				System.out.println("잘못입력하셨습니다.");
 			}
+		}
+	}
+
+	private void ItemValidation() { // 상품 있는지 검사
+		List<Order> orderItems = orderService.ItemView();
+		if (orderItems.size() == 0) {
+			System.out.println("상품이 없습니다. 메뉴로 돌아갑니다.");
+			return;
 		}
 	}
 
@@ -60,7 +84,8 @@ public class KioskController {
 		outputView.printOrderView(orderService.ItemView());
 	}
 
-	private void ItemSomePut() { // 장바구니 상품 수량 변경
+	private void ItemSomePut() { // 장바구니 수량 변경
+		ItemValidation();
 		System.out.println("수량 변경할 상품 id를 입력하세요.");
 		int id = inputView.readNumber();
 		System.out.println("변경할 수량을 입력하세요.");
@@ -68,16 +93,84 @@ public class KioskController {
 		outputView.printItemSomePut(orderService.ItemSomePut(id, updateSome));
 	}
 
-	private void ItemOpstionPut() { // 장바구니 옵션 변경
-		//메뉴 카테고리 미구현
-	}
-
 	private void ItemAdd() { // 장바구니 상품 추가
-		//메뉴 추가기능 미구현
+		// ---------------- 카테고리 선택 ----------------
+		List<MenuCategory> menuCategories = menuService.getMenuCategories();
+		outputView.printMenuCategory(menuCategories);
+		int categoryNumber = inputView.readNumber();
+		if (categoryNumber == 0)
+			return;
+		
+		if (categoryNumber < 1 || categoryNumber > menuCategories.size()) {
+			System.out.println("잘못된 카테고리 번호입니다.");
+			return;
+		}
+		MenuCategory menuCategory = menuCategories.get(categoryNumber - 1);
+		// ---------------- 메뉴 선택 ----------------
+		List<MenuItem> menuItems = menuService.getMenuItems(menuCategory);
+		outputView.printMenuItems(menuItems);
+		int menuNumber = inputView.readNumber();
+		if (menuNumber == 0)
+			return;
+
+		if (menuNumber < 1 || menuNumber > menuItems.size()) {
+			System.out.println("잘못된 메뉴 번호입니다.");
+			return;
+		}
+
+		MenuItem menuItem = menuItems.get(menuNumber - 1);
+		// ---------------- 옵션 선택 ----------------
+		List<String> options = new ArrayList<>();
+		long optionPrice = 0;
+		for (MenuOption menuOption : menuItem.getMenuOptions()) {
+			outputView.printMenuOption(menuOption);
+			int optionNumber = inputView.readNumber();
+			if (optionNumber < 1 || optionNumber > menuOption.getOptionValues().size()) {
+				System.out.println("잘못된 옵션 번호입니다.");
+				return;
+			}
+			String optionValue = menuOption.getOptionValues().get(optionNumber - 1);
+			long additionalPrice = menuOption.getAdditionalPrice(optionNumber - 1);
+			options.add(menuOption.getOptionName() + ": " + optionValue);
+			optionPrice += additionalPrice;
+		}
+
+		// ---------------- 수량 입력 ----------------
+		System.out.println("수량을 입력하세요.");
+		int quantity = inputView.readNumber();
+		if (quantity < 1) {
+			System.out.println("수량은 1개 이상 입력해주세요.");
+			return;
+		}
+
+		// ---------------- 장바구니 선택 ----------------
+		System.out.println("=========장바구니=========");
+		System.out.println("1. 장바구니 담기");
+		System.out.println("2. 취소");
+
+		int choice = inputView.readNumber();
+
+		if (choice == 2) {
+			System.out.println("상품 추가를 취소합니다.");
+			return;
+		}
+
+		if (choice != 1) {
+			System.out.println("잘못입력하셨습니다.");
+			return;
+		}
+
+		// ---------------- Order 생성 ----------------
+		long price = menuItem.getPrice() + optionPrice;
+		Order order = new Order(0, menuItem, menuCategory, price, quantity, options);
+		// ---------------- 장바구니 추가 ----------------
+		orderService.ItemAdd(order);
+		System.out.println("장바구니에 상품이 추가되었습니다.");
 	}
 
-	private void ItemDelete() { // 장바구니 상품 삭제
-		System.out.println("수량 변경할 상품 id를 입력하세요.");
+	private void ItemDelete() { // 상품 삭제
+		ItemValidation();
+		System.out.println("삭제할 상품 id를 입력하세요.");
 		int id = inputView.readNumber();
 		orderService.ItemDelete(id);
 		outputView.printItemDelete();
@@ -86,10 +179,9 @@ public class KioskController {
 	private void ItemDeleteAll() { // 상품 전체 삭제
 		orderService.ItemDeleteAll();
 	}
-	////-----------------결제----------------------
-
-	//-----------------결제----------------------
-	private void payment() { //결제하기
+	// ----------------- 결제 ----------------------
+	private void payment() { // 결제하기
+		ItemValidation();
 		while (true) {
 			int totalPrice = orderService.payMent();
 			outputView.pirntPayMentOpstion(totalPrice);
@@ -105,28 +197,30 @@ public class KioskController {
 				System.out.println("결제를 취소하고 이전 화면으로 돌아갑니다.");
 				return;
 			default:
-				System.out.println("잘못입력하셨습니다. 결제를 취소합니다.");
+				System.out.println("잘못입력하셨습니다.");
+				continue;
 			}
-		    System.out.println("이용해주셔서 감사합니다. 맛있는 음료가 준비되면 호출해 드리겠습니다!\n");
-		    return;
+			return;
 		}
 	}
 
 	private void paymentCard() { // 카드 결제
+		ItemValidation();
 		orderService.ItemDeleteAll();
 		System.out.println("신용카드 결제가 완료되었습니다.");
+		System.out.println("이용해주셔서 감사합니다. 맛있는 음료가 준비되면 호출해 드리겠습니다!\n");
 	}
-	
+
 	private void paymentCash(int totalPrice) { // 현금 결제
-		System.out.println("현금을 입력하세요");;
+		ItemValidation();
+		System.out.println("현금을 입력하세요.");
 		int cash = inputView.readNumber();
-		if(cash < totalPrice) {
-			System.out.println("금액이 부족합니다. 결제가 취소 됩니다.");
+		if (cash < totalPrice) {
+			System.out.println("금액이 부족합니다. 결제가 취소됩니다.");
 			return;
 		}
-		System.out.println("거스름돈 "+(cash - totalPrice)+ "원입니다. 결제가 완료되었습니다.");
+		System.out.println("거스름돈 " + (cash - totalPrice) + "원입니다. 결제가 완료되었습니다.");
 		orderService.ItemDeleteAll();
+		System.out.println("이용해주셔서 감사합니다. 맛있는 음료가 준비되면 호출해 드리겠습니다!\n");
 	}
-	////-----------------결제----------------------
-	
 }

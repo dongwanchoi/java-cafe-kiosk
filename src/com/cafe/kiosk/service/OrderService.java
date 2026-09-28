@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.cafe.kiosk.domain.order.Order;
 import com.cafe.kiosk.repository.OrderRepository;
-import com.cafe.kiosk.view.InputView;
 
 public class OrderService {
 
@@ -22,12 +21,8 @@ public class OrderService {
 		return orderRepository.ItemSomePut(id, num);
 	}
 
-	public Order ItemOpstionPut() { // 장바구니 옵션 변경
-		return null;
-	}
-
-	public Order ItemAdd() {// 장바구니 상품 추가
-		return null;
+	public Order ItemAdd(Order order) {// 장바구니 상품 추가
+		return orderRepository.ItemAdd(order);
 	}
 
 	public void ItemDelete(int id) { // 장바구니 상품 삭제

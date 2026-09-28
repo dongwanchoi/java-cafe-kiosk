@@ -10,23 +10,14 @@ public class OrderRepositoryImpl implements OrderRepository {
 	private static final List<Order> orderItems = new ArrayList<>();
 
 	public OrderRepositoryImpl() {
-		this.orderItems.add(new Order(1, "아메리카노", "COFFEE", 3500, 1));
-		this.orderItems.add(new Order(2, "라떼", "COFFEE", 4000, 1));
-		this.orderItems.add(new Order(3, "에스프레소", "COFFEE", 3000, 2));
-		this.orderItems.add(new Order(4, "디카페인 아메리카노", "NONCOFFEE", 3500, 3));
-		this.orderItems.add(new Order(5, "디카페인 라떼", "NONCOFFEE", 4000, 4));
-		this.orderItems.add(new Order(6, "디카페인 에스프레소", "NONCOFFEE", 3000, 5));
-		this.orderItems.add(new Order(7, "토스트", "DESSERT", 4500, 6));
-		this.orderItems.add(new Order(8, "조각케이크", "DESSERT", 5000, 7));
-		this.orderItems.add(new Order(9, "크로플", "DESSERT", 4000, 8));
-		this.orderItems.add(new Order(10, "크로플", "DESSERT", 4000, 8));
 	}
 
+	@Override
 	public List<Order> ItemView() { // 장바구니 상품 조회
-		List<Order> orderItems = new ArrayList<>(this.orderItems);
-		return orderItems;
+		return new ArrayList<>(orderItems);
 	}
 
+	@Override
 	public Order ItemSomePut(int id, int num) { // 장바구니 수량 변경
 		for (Order orderItem : orderItems) {
 			if (orderItem.getId() == id) {
@@ -37,25 +28,37 @@ public class OrderRepositoryImpl implements OrderRepository {
 		return null;
 	}
 
-	public Order ItemOpstionPut() { // 장바구니 옵션 변경
-		return null;
+	@Override
+	public Order ItemAdd(Order order) { // 장바구니 상품 추가
+		for (Order orderItem : orderItems) { // 같은 메뉴 + 같은 옵션인지 확인
+			if (orderItem.getMenuItem() == order.getMenuItem() && orderItem.getOptions().equals(order.getOptions())) {
+				orderItem.setSome(orderItem.getSome() + order.getSome()); // 같은 상품이면 수량만 합침
+				return orderItem;
+			}
+		}
+		// 새로운 장바구니 상품이면 id 부여
+		order = new Order(orderItems.size() + 1, order.getMenuItem(), order.getMenuCategory(), order.getPrice(), order.getSome(), order.getOptions());
+		orderItems.add(order);
+		return order;
 	}
 
-	public Order ItemAdd() {// 장바구니 상품 추가
-		return null;
-	}
-
+	@Override
 	public void ItemDelete(int id) { // 장바구니 상품 삭제
-		System.out.println(id);
-		orderItems.remove(id - 1);
+		for (Order orderItem : orderItems) {
+			if (orderItem.getId() == id) {
+				orderItems.remove(orderItem);
+				return;
+			}
+		}
 	}
 
+	@Override
 	public void ItemDeleteAll() { // 장바구니 상품 전체 삭제
-		orderItems.removeAll(orderItems);
+		orderItems.clear();
 	}
 
+	@Override
 	public List<Order> payMent() { // 결제
-		return orderItems;
+		return new ArrayList<>(orderItems);
 	}
-
 }

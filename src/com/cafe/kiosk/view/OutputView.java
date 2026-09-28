@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.cafe.kiosk.domain.menu.MenuCategory;
 import com.cafe.kiosk.domain.menu.MenuItem;
+import com.cafe.kiosk.domain.menu.MenuOption;
 import com.cafe.kiosk.domain.order.Order;
 
 public class OutputView {
@@ -14,38 +15,58 @@ public class OutputView {
 		this.inputView = inputView;
 	}
 
-	public void printMenuCategory(List<MenuCategory> menuCategorys) { // 카테고리 선택
-		System.out.println("메뉴 카테고리를 선택하세요.");
-		// 출력 기능 구현
+	//-----------------메뉴 선택----------------------
+	public void printMenuCategory(List<MenuCategory> menuCategories) { // 메뉴 카테고리 선택
+		System.out.println("=========메뉴 카테고리=========");
+		for (int i = 0; i < menuCategories.size(); i++) {
+			System.out.println((i + 1) + ". " + menuCategories.get(i));
+		}
+		System.out.println("0. 주문 완료");
 	}
 
 	public void printMenuItems(List<MenuItem> menuItems) { // 메뉴 선택
-		System.out.println("상품을 선택하세요.");
-		// 출력 기능 구현
+		System.out.println("=========메뉴=========");
+		for (int i = 0; i < menuItems.size(); i++) {
+			MenuItem menuItem = menuItems.get(i);
+			System.out.printf("%d. %-20s %d원%n",
+					i + 1,
+					menuItem.getName(),
+					menuItem.getPrice());
+		}
+		System.out.println("0. 이전 화면");
 	}
 	
+	public void printMenuOption(MenuOption menuOption) { // 메뉴 옵션 선택
+		System.out.println("========= " + menuOption.getOptionName() + " =========");
+		for (int i = 0; i < menuOption.getOptionValues().size(); i++) {
+			String optionValue = menuOption.getOptionValues().get(i);
+			long additionalPrice = menuOption.getAdditionalPrice(i);
+			if (additionalPrice > 0) {
+				System.out.println((i + 1) + ". " + optionValue + " (+" + additionalPrice + "원)");
+			} else {
+				System.out.println((i + 1) + ". " + optionValue);
+			}
+		}
+	}
+	////-----------------메뉴 선택----------------------
 	
 	//-----------------장바구니----------------------
 	public void printOrder() { // 장바구니 메뉴 선택
 		System.out.println("=========장바구니=========");
-		System.out.println("* 전체 상품 조회");
-		
-		System.out.println("1. 상품 수량 변경");
-		System.out.println("2. 상품 옵션 변경");
+		System.out.println("1. 상품 추가");
+		System.out.println("2. 상품 수량 변경");
 		System.out.println("3. 상품 삭제");
 		System.out.println("4. 상품 전체 삭제");
-		System.out.println("5. 상품 추가 하기");
-		System.out.println("6. 결제하기");
-		// 출력 기능 구현
+		System.out.println("5. 결제하기");
+		System.out.println("0. 종료");
 	}
 
 	public void printOrderView(List<Order> orderItems) { // 장바구니 상품 조회
-		System.out.println("장바구니 상품조회 ============");
 		for (Order orderItem : orderItems) {
 			 System.out.printf("id: %-3d | 카테고리: %-12s | 상품: %-15s | 가격: %-6d | 수량: %-2d | 금액: %-7d%n",
 		                orderItem.getId(),
 		                orderItem.getMenuCategory(),
-		                orderItem.getMenuItem(),
+		                orderItem.getMenuItem().getName(),
 		                orderItem.getPrice(),
 		                orderItem.getSome(),
 		                (orderItem.getSome()*orderItem.getPrice()));
@@ -57,18 +78,10 @@ public class OutputView {
 		System.out.printf("id: %-3d | 카테고리: %-12s | 상품: %-15s | 가격: %-6d | 수량: %-2d%n",
                 orderItem.getId(),
                 orderItem.getMenuCategory(),
-                orderItem.getMenuItem(),
+                orderItem.getMenuItem().getName(),
                 orderItem.getPrice(),
                 orderItem.getSome());
 				System.out.println();
-	}
-
-	public Order printItemOpstionPut() { // 장바구니 옵션 변경
-		return null;
-	}
-
-	public Order printItemAdd() {// 장바구니 상품 추가
-		return null;
 	}
 
 	public void printItemDelete() { // 장바구니 상품 삭제

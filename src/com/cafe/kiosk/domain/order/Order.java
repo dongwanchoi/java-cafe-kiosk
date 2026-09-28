@@ -1,20 +1,25 @@
 package com.cafe.kiosk.domain.order;
 
+import java.util.List;
+
+import com.cafe.kiosk.domain.menu.MenuCategory;
+import com.cafe.kiosk.domain.menu.MenuItem;
+
 public class Order {
 	int id;
-//	private MenuCategory menuCategory;
-//	private MenuItem menuItem;
-	private String menuCategory;
-	private String menuItem;
+	private MenuCategory menuCategory;
+	private MenuItem menuItem;
 	private long price;
 	private int some;
+	private List<String> options;
 
-	public Order(int id, String menuItem, String menuCategory, long price, int some) {
+	public Order(int id, MenuItem menuItem, MenuCategory menuCategory, long price, int some, List<String> options) {
 		this.id = id;
-		this.menuCategory = menuCategory;
 		this.menuItem = menuItem;
+		this.menuCategory = menuCategory;
 		this.price = price;
 		this.some = some;
+		this.options = options;
 	}
 
 	public Order() {
@@ -26,17 +31,18 @@ public class Order {
 		this.menuItem = orderItem.menuItem;
 		this.price = orderItem.price;
 		this.some = orderItem.some;
+		this.options = orderItem.options;
 	}
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public String getMenuCategory() {
+	public MenuCategory getMenuCategory() {
 		return menuCategory;
 	}
 
-	public String getMenuItem() {
+	public MenuItem getMenuItem() {
 		return menuItem;
 	}
 
@@ -46,6 +52,10 @@ public class Order {
 
 	public int getSome() {
 		return some;
+	}
+
+	public List<String> getOptions() {
+		return options;
 	}
 
 	public void setSome(int some) {
