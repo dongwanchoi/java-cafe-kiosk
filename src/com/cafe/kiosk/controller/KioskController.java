@@ -41,6 +41,7 @@ public class KioskController {
 			System.out.println("잘못입력 종료.");
 		}
 	}
+	
 	// ----------------- 장바구니 ----------------------
 	private void orderMain() {
 		while (true) {

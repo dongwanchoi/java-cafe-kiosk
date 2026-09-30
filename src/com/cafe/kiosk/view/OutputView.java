@@ -63,10 +63,11 @@ public class OutputView {
 
 	public void printOrderView(List<Order> orderItems) { // 장바구니 상품 조회
 		for (Order orderItem : orderItems) {
-			 System.out.printf("id: %-3d | 카테고리: %-12s | 상품: %-15s | 가격: %-6d | 수량: %-2d | 금액: %-7d%n",
+			System.out.printf("id: %-3d | 카테고리: %-12s | 상품: %-10s | 옵션: %-15s | 가격: %-6d | 수량: %-2d | 금액: %-7d%n",
 		                orderItem.getId(),
 		                orderItem.getMenuCategory(),
 		                orderItem.getMenuItem().getName(),
+		                orderItem.getOptions(),
 		                orderItem.getPrice(),
 		                orderItem.getSome(),
 		                (orderItem.getSome()*orderItem.getPrice()));
